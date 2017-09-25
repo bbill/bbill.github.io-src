@@ -1,0 +1,99 @@
+#+DATE: <2017-09-25 Mon>
+#+TITLE: SDN 教学大纲
+#+CATEGORY: SDN 教学
+#+AUTHOR: service@tooyum.com
+#+PROPERTY: LANGUAGE en
+#+PROPERTY: SUMMARY 一个简单的教学大纲,
+#+PROPERTY: SLUG test_slug
+#+PROPERTY: MODIFIED [2015-12-29 Di]
+#+PROPERTY: TAGS ryu, openflow, mininet, estinet
+
+
+
+# 软体定义网路 课程搭配仿真软件及 SDN 交换机
+
+# 课程内容概要说明：
+# 本课程的编辑主要分为几个部分，首先对仿真软件及其工作环境的介绍、对网络应用工具的说明与学
+# 习。接下来我们对 SDN 新一代网络架构与规格进行教学并且藉由 OSI 第三层网络元件熟悉仿真软件的
+# 应用与操作。最后我们进行 SDN 教学，由简单的课程再进入到高阶的应用课程。简单的课程藉由实际
+# 操作 SDN 交换机的功能设定到以网络仿真器的模拟来了解 SDN 系统的运作。而最后的重点则在于 SDN
+# 的应用，包括了网络功能虚拟化及资安的课程。
+
+# SDN 的价值在于建置新一代 SDN 网络架构以后如何布建多样性、集中式的网络功能管理器，也就是我
+# 们常说的网络功能虚拟化（Network Function Virtualization）。SDN 的网络架构，可以简轻我们网
+# 络管理负担、提高管理效能也摆脱过去网络功能依赖少数几家网络厂商的情境。
+
+
+* 教学环境准备
+
+** 仿真工具
+  可选开源(mininet)，商用(estinet)仿真软件
+** 常用工具
+ 1. Wireshark 网路抓包工具
+ 2. xterm
+ 3. tcptrace
+ 4. WinSCP
+ 5. Gnuplot
+ 7. Docker 与 OVS 介绍
+
+
+* 传统网络基础
+
+  1. NAT 网路地址址转换（Network Address Translation）
+  2. DHCP 动态主机设定协议（Dynamic Host Configuration Protocol）
+  3. 域名解析 DNS（Domain Name System）
+
+* SDN 与 OpenFlow 技术基本概念
+  1. 软体定义网路（Software-Defined Networking）
+  2. 控制平面（Control Plane）
+  3. 资料平面（Data Plane）
+  4. OpenFlow 架构与运作原理
+  5. SDN 控制器（SDN Controller）
+     1. POX
+     2. RYU
+     3. ONOS
+     4. ODL
+  6. OVS（Open vSwitch）/ ovs-ofctl 简介
+  7. 网路功能虚拟化
+  8. SDN与网路安全
+
+
+* SDN 网络入门实验
+
+  1. RYU 控制器安装启动
+  2. 仿真工具建立一个简单的拓扑
+  3. 控制器和交换机（仿真拓扑）的对接
+  4. 验证
+
+
+* 了解流表
+  1. 查看
+  2. 增加删除修改
+  3. 匹配项
+  4. 动作
+
+* RYU控制器初步
+  1. 控制器框架
+  2. 事件驱动
+  3. 一个简单的APP（HUB）
+
+* 进阶应用
+
+  1. simpleswitch
+  2. arp proxy
+  3. security （自定义策略）
+     1. Firewall
+     2. QOS
+  4. RYU: Dijkstra 算法
+
+* 实体交换机验证
+  1. 在实体交换机上验证自己的APP
+  
+
+
+  
+
+
+
+     
+

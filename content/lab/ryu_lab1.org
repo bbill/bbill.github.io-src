@@ -1,0 +1,222 @@
+#+DATE: 2017-09-24 07:55
+#+TITLE: Ryu 控制器的安装及基本操作
+#+CATEGORY: 实验
+#+AUTHOR: service@tooyum.com
+#+PROPERTY: LANGUAGE en
+#+PROPERTY: SUMMARY RYU 安装操作
+#+PROPERTY: MODIFIED [2015-12-29 Di]
+#+PROPERTY: TAGS ryu, openflow, mininet
+#+PROPERTY: SAVE_AS alternative_filename.html
+
+
+
+* 实验环境
+ 1. 一台可以上网的主机station X (IP 地址 192.168.10.X）
+ 2. ubuntu 14.04 操作系统,用户名 user 密码 linux123
+
+* 实验目的
+ 1. 掌握Linux 命令行基础使用方法
+ 2. 掌握Ubuntu 软件安装方法
+ 3. 掌握 mininet 基础使用方法
+ 4. 掌握 ryu 控制器的基本用法
+ 5. 了解 screen 的用法
+
+* 操作步骤
+
+** 安装一些后续需要使用的软件
+    - git 版本管理工具
+    - screen 终端增强工具
+      ubuntu 是基于debian的linux 发行版，采用 apt-get/aptitude 来进行软件的安装，升级，解决依赖关系等.
+      可以在终端执行
+    
+      #+BEGIN_SRC bash
+	apt-get install git screen
+	#+END_SRC
+      来安装 git和screen 两个包.
+
+      由于当前用户是普通用户不具备安装软件的权限，所以以上命令会失败，那
+      么普通用户如何获得root权限呢，一般有两种方式su （siwtch user）获
+      得一个交互shell 或者 sudo （switch user do） 在执行命令时获得
+      root权限，不进入交互模式。将以上命令修改为：
+	
+	#+BEGIN_SRC bash
+	sudo apt-get install git screen
+	#+END_SRC
+
+	提示输入密码（输入 user 用户密码 linux123), 你可以看到命令成功执行了。
+** 安装 ryu
+ 1. 下载安装脚本
+	#+BEGIN_SRC shell
+	wget https://raw.githubusercontent.com/sdnds-tw/ryuInstallHelper/master/ryuInstallHelper.sh
+	#+END_SRC
+ 2. 查看安装脚本内容
+        #+BEGIN_SRC bash
+	user@station21:~$ cat ryuInstallHelper.sh 
+	#+END_SRC
+
+ 3. 执行安装脚本
+	#+BEGIN_SRC bash
+	    sudo bash ryuInstallHelper.sh
+	#+END_SRC
+
+补充，
+
+sudo aptitude install debian-keyring debian-archive-keyring
+
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys
+
+
+** 安装 mininet
+   mininet 是一个网络拓扑仿真程序，可以非常方便的实现拓扑/交换机的模拟，
+   支持openflow协议。方便用户定制自己的SDN 网络拓扑。
+ 1. 安装mininet
+    执行
+	#+BEGIN_SRC bash
+	sudo apt-get install mininet
+	pip install networkx 
+	#+END_SRC
+
+ 2. 停止并禁用 openvswitch-controller 服务
+    mininet 默认会安装一个openvswitch-controller 控制器，此服务启动后会占用控制器的默认端口，所以先暂时停止
+    
+	#+BEGIN_SRC bash
+	sudo /etc/init.d/openvswitch-controller  stop
+	#+END_SRC
+    并禁用该服务
+	#+BEGIN_SRC bash
+	sudo update-rc.d -f openvswitch-controller remove
+	#+END_SRC
+
+
+** ryu 控制和mininet连接
+ 1. 启动 screen 终端管理工具
+    screen -DR
+    - 通过Ctrl-a S 快捷键将屏幕切分为三份 #注意大小写
+    - Ctrl-a [Tab] 切换到下方区域执行　Ctrl-a c 
+    - Ctrl-a [Tab] 切换到下方区域执行　Ctrl-a c 
+    - Ctrl-a [Tab] 切换到第一个窗口
+ 2. 启动一个简单网络拓扑
+    - 启动ovs服务
+	#+BEGIN_SRC bash
+	sudo /etc/init.d/openvswitch-switch start
+	#+END_SRC
+    - 启动mininet拓扑
+
+      在该窗口启动一个简单mininet 拓扑,并指定SDN 控制器为本地地址（192.168.10.21）
+	#+BEGIN_SRC bash
+	sudo mn --topo single,3 --mac --switch ovsk --controller remote,ip=192.168.10.21,port=6633
+	#+END_SRC
+
+    - 检查交换机状态
+	#+BEGIN_SRC bash
+	sudo ovs-vsctl show
+	bee7cda2-0792-4de4-9381-fc7f298f3baa
+	    Bridge "s1"   
+	        Controller "ptcp:6634"
+	        Controller "tcp:192.168.10.21:6633"
+	        fail_mode: secure
+	        Port "s1-eth3"
+	            Interface "s1-eth3"
+	        Port "s1-eth1"
+	            Interface "s1-eth1"
+	        Port "s1"
+	            Interface "s1"
+	                type: internal
+	        Port "s1-eth2"
+	            Interface "s1-eth2"
+	    ovs_version: "2.0.2"
+	#+END_SRC
+ 3. 启动ryu 控制器
+    - Ctrl-a [Tab] 切换到第二个窗口
+    - 启动 ryu 控制器，以及一个简单的应用
+	#+BEGIN_SRC bash
+	./ryu/bin/ryu-manager ./ryu/ryu/app/simple_switch_13.py
+	#+END_SRC
+
+      启动一个符合 openflow 1.3 标准的交换机应用
+ 4. 确认交换机和控制器的连接是否成功
+	#+BEGIN_SRC bash
+	sudo ovs-vsctl show
+	bee7cda2-0792-4de4-9381-fc7f298f3baa
+	    Bridge "s1"   
+	        Controller "ptcp:6634"
+	        Controller "tcp:192.168.10.21:6633"
+		     is_connected: true
+	        fail_mode: secure
+	        Port "s1-eth3"
+	            Interface "s1-eth3"
+	        Port "s1-eth1"
+	            Interface "s1-eth1"
+	        Port "s1"
+	            Interface "s1"
+	                type: internal
+	        Port "s1-eth2"
+	            Interface "s1-eth2"
+	    ovs_version: "2.0.2"
+	#+END_SRC
+
+ 5. 网络通吗？
+    
+    在mininet 终端下主机之间互ping ，可以看到是无法ping 通的。
+    
+    检查控制器的输出你可以注意到如下内容：
+	#+BEGIN_SRC bash
+	./ryu/bin/ryu-manager ./ryu/ryu/app/simple_switch_13.py
+	unsupported version 0x1. If possible, set the switch to use one of the versions [4]
+	#+END_SRC
+    
+    这意味着交换机（mininet) 和ryu 控制器之间的openflow 协议协商不成功。我们需要手工指定交换机的openflow 协议版本。
+
+	#+BEGIN_SRC bash
+	ovs-vsctl set bridge s1 protocols=OpenFlow10,OpenFlow13
+	#+END_SRC
+
+    可选多个版本。
+
+    观察ryu-manager 的输出是不是有一些不同，尝试在mininet中ping，现在网络应该通了。
+    
+
+    
+
+
+
+* 附录
+** 用到的命令
+
+   #+BEGIN_SRC bash
+   apt-get install git screen
+   sudo apt-get install git screen -y
+   wget https://raw.githubusercontent.com/sdnds-tw/ryuInstallHelper/master/ryuInstallHelper.sh
+   less ryuInstallHelper.sh
+   sudo bash ryuInstallHelper.sh
+   sudo apt-get install  mininet  -y
+   sudo /etc/init.d/openvswitch-switch status
+   sudo /etc/init.d/openvswitch-switch start
+   sudo /etc/init.d/openvswitch-controller stop
+   sudo update-rc.d -f openvswitch-controller remove
+   sudo mn --topo single,3 --mac --switch ovsk --controller remote,ip=192.168.10.21,port=6633
+   sudo ovs-vsctl show
+   /etc/init.d/openvswitch-switch status
+   screen -DR
+   sudo mn --topo single,3 --mac --switch ovsk --controller remote,ip=192.168.10.21,port=6633
+   ./ryu/bin/ryu-manager ./ryu/ryu/app/simple_switch_13.py 
+   sudo ovs-vsctl set bridge s1 protocols=OpenFlow10,OpenFlow13 
+   sudo kill -9 `pgrep -f 'ryu-manager'`
+   #+END_SRC
+
+    
+   
+   如果ubuntu没有安装图形界面，可以通过 
+   #+BEGIN_SRC bash
+apt-get install gnome-shell ubuntu-gnome-desktop
+#+END_SRC
+
+   在虚拟化环境中加以禁用3D效果以改善体验：
+   #+BEGIN_SRC bash
+   apt-get  install gnome-session-fallback
+   #+END_SRC
+
+   然后从图形界面 logout，在登录时选择 GNOME FlashBack (metacity)。
+ 
+
+
